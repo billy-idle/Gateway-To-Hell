@@ -1,6 +1,7 @@
 server:
   error:
     include-message: always
+  port: 8443
 
 management:
   endpoints:
@@ -24,6 +25,7 @@ logging:
       reactor.netty.http.server: trace
       org.springframework.cloud.gateway: trace
       springframework:
+        web: info
         cloud:
           gateway:
             handler:
@@ -39,6 +41,10 @@ logging:
 http-exchange-repository-capacity: 1000
 
 spring:
+  boot:
+    admin:
+      client:
+        url: http://localhost:8090/admin
   application:
     name: gateway-to-hell
   output:
@@ -55,8 +61,20 @@ spring:
         - id: agify_route
           uri: http://localhost:8081
           predicates:
-            - Path=/api/agify
+            - Path=/api/agify, /v3/api-docs/agify
             - Query=name
+        - id: random-user_route
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/random-user
+        - id: cat-facts_route
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/cat-facts
+        - id: admin_route
+          uri: http://localhost:8090
+          predicates:
+            - Path=/admin/**
         - id: zipkin
           uri: http://localhost:9411
           predicates:
