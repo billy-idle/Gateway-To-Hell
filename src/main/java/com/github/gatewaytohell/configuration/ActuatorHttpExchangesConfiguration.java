@@ -1,4 +1,4 @@
-package com.github.agify.configuration;
+package com.github.gatewaytohell.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.web.exchanges.HttpExchangeRepository;

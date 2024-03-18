@@ -1,1 +1,63 @@
-spring.application.name=GatewayToHell
+server:
+  error:
+    include-message: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  info:
+    env:
+      enabled: true
+  endpoint:
+    env:
+      show-values: always
+  tracing:
+    sampling:
+      probability: 1.0
+
+logging:
+  level:
+    root: info
+    org:
+      reactor.netty.http.server: trace
+      org.springframework.cloud.gateway: trace
+      springframework:
+        cloud:
+          gateway:
+            handler:
+              RoutePredicateHandlerMapping: trace
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 90
+      total-size-cap: 20GB
+  file:
+    name: logs/${spring.application.name}.log
+
+http-exchange-repository-capacity: 1000
+
+spring:
+  application:
+    name: gateway-to-hell
+  output:
+    ansi:
+      enabled: always
+  cloud:
+    gateway:
+      routes:
+        - id: path_route
+          uri: https://jsonplaceholder.typicode.com
+          predicates:
+            - Path=/users/{segment}, /posts
+            - Query=userId
+        - id: agify_route
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/agify
+            - Query=name
+        - id: zipkin
+          uri: http://localhost:9411
+          predicates:
+            - Path=/zipkin/**
