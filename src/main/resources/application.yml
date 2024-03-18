@@ -1,1 +1,81 @@
-spring.application.name=GatewayToHell
+server:
+  error:
+    include-message: always
+  port: 8443
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  info:
+    env:
+      enabled: true
+  endpoint:
+    env:
+      show-values: always
+  tracing:
+    sampling:
+      probability: 1.0
+
+logging:
+  level:
+    root: info
+    org:
+      reactor.netty.http.server: trace
+      org.springframework.cloud.gateway: trace
+      springframework:
+        web: info
+        cloud:
+          gateway:
+            handler:
+              RoutePredicateHandlerMapping: trace
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 90
+      total-size-cap: 20GB
+  file:
+    name: logs/${spring.application.name}.log
+
+http-exchange-repository-capacity: 1000
+
+spring:
+  boot:
+    admin:
+      client:
+        url: http://localhost:8090/admin
+  application:
+    name: gateway-to-hell
+  output:
+    ansi:
+      enabled: always
+  cloud:
+    gateway:
+      routes:
+        - id: path_route
+          uri: https://jsonplaceholder.typicode.com
+          predicates:
+            - Path=/users/{segment}, /posts
+            - Query=userId
+        - id: agify_route
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/agify, /v3/api-docs/agify
+            - Query=name
+        - id: random-user_route
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/random-user
+        - id: cat-facts_route
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/cat-facts
+        - id: admin_route
+          uri: http://localhost:8090
+          predicates:
+            - Path=/admin/**
+        - id: zipkin
+          uri: http://localhost:9411
+          predicates:
+            - Path=/zipkin/**
